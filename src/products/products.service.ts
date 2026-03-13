@@ -32,4 +32,10 @@ export class ProductsService {
   findOne(id: number) {
     return this.products.find((product) => product.id === id);
   }
+
+  remove(id: number) {
+    const index = this.products.findIndex((product) => product.id === id);
+    if (index === -1) return undefined;
+    return this.products.splice(index, 1)[0];
+  }
 }
