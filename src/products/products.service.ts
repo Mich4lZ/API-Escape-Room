@@ -1,41 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Product } from './product.entity';
 import { CreateProductDto } from './create.product.dto';
 
 @Injectable()
 export class ProductsService {
-  private readonly products = [
-    { id: 1, name: 'Laptop', price: 2999.99 },
-    { id: 2, name: 'Smartphone', price: 1499.99 },
-    { id: 3, name: 'Headphones', price: 299.99 },
-    { id: 4, name: 'Keyboard', price: 149.99 },
-    { id: 5, name: 'Mouse', price: 79.99 },
-  ];
+  constructor(
+    @InjectRepository(Product)
+    private readonly productsRepository: Repository<Product>,
+  ) {}
 
-  create(dto: CreateProductDto) {
-    const maxId = this.products.reduce(
-      (max, p) => (p.id > max ? p.id : max),
-      0,
-    );
-    const newProduct = {
-      id: maxId + 1,
-      name: dto.name,
-      price: dto.price,
-    };
-    this.products.push(newProduct);
-    return newProduct;
+  async create(dto: CreateProductDto): Promise<Product> {
+    const product = this.productsRepository.create(dto);
+    return this.productsRepository.save(product);
   }
 
-  findAll() {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    return this.productsRepository.find();
   }
 
-  findOne(id: number) {
-    return this.products.find((product) => product.id === id);
+  async findOne(id: number): Promise<Product | null> {
+    return this.productsRepository.findOneBy({ id });
   }
 
-  remove(id: number) {
-    const index = this.products.findIndex((product) => product.id === id);
-    if (index === -1) return undefined;
-    return this.products.splice(index, 1)[0];
+  async remove(id: number): Promise<Product> {
+    const product = await this.productsRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException('Produkt nie istnieje');
+    }
+    return this.productsRepository.remove(product);
   }
 }

@@ -28,14 +28,14 @@ export class ProductsController {
   @ApiOperation({ summary: 'Dodaj nowy produkt' })
   @ApiResponse({ status: 201, description: 'Produkt został utworzony' })
   @ApiResponse({ status: 400, description: 'Błąd walidacji (DTO)' })
-  create(@Body() createProductDto: CreateProductDto) {
+  async create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Pobierz listę wszystkich produktów' })
   @ApiResponse({ status: 200, description: 'Lista produktów' })
-  findAll() {
+  async findAll() {
     return this.productsService.findAll();
   }
 
@@ -44,8 +44,8 @@ export class ProductsController {
   @ApiParam({ name: 'id', description: 'ID produktu', example: 1 })
   @ApiResponse({ status: 200, description: 'Znaleziony produkt' })
   @ApiResponse({ status: 404, description: 'Produkt nie istnieje' })
-  findOne(@Param('id') id: string) {
-    const product = this.productsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const product = await this.productsService.findOne(+id);
     if (!product) throw new NotFoundException('Produkt nie istnieje');
     return product;
   }
@@ -58,9 +58,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Produkt został usunięty' })
   @ApiResponse({ status: 403, description: 'Brak lub nieprawidłowy x-admin-key' })
   @ApiResponse({ status: 404, description: 'Produkt nie istnieje' })
-  remove(@Param('id') id: string) {
-    const product = this.productsService.remove(+id);
-    if (!product) throw new NotFoundException('Produkt nie istnieje');
-    return product;
+  async remove(@Param('id') id: string) {
+    return this.productsService.remove(+id);
   }
 }
